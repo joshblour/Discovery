@@ -207,6 +207,8 @@
 }
 
 - (void)peripheralManagerDidUpdateState:(CBPeripheralManager *)peripheral {
+    [[NSUserDefaults standardUserDefaults] setObject:@(peripheral.state) forKey:kBluetoothPeripheralStateKey];
+
     if(peripheral.state == CBPeripheralManagerStatePoweredOn) {
         [self startAdvertising];
     }
@@ -217,6 +219,8 @@
 
 - (void)centralManagerDidUpdateState:(CBCentralManager *)central
 {
+    [[NSUserDefaults standardUserDefaults] setObject:@(central.state) forKey:kBluetoothCentralStateKey];
+
     if (central.state == CBCentralManagerStatePoweredOn) {
         [self startDetecting];
     }

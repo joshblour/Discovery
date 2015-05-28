@@ -12,6 +12,9 @@
 #import <CoreLocation/CoreLocation.h>
 #import "BLEUser.h"
 
+#define kBluetoothPeripheralStateKey @"bluetoothPeripheralState"
+#define kBluetoothCentralStateKey @"bluetoothCentralState"
+
 /** Start options */
 typedef NS_ENUM(NSInteger, DIStartOptions) {
     DIStartAdvertisingAndDetecting = 0,
