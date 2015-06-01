@@ -12,6 +12,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import "BLEUser.h"
 
+#define kBluetoothStateNotificationKey @"bluetoothStateNotification"
 #define kBluetoothPeripheralStateKey @"bluetoothPeripheralState"
 #define kBluetoothCentralStateKey @"bluetoothCentralState"
 
@@ -75,6 +76,9 @@ typedef NS_ENUM(NSInteger, DIStartOptions) {
 @property (nonatomic) dispatch_queue_t queue;
 @property (strong, nonatomic) CBCentralManager *centralManager;
 @property (strong, nonatomic) CBPeripheralManager *peripheralManager;
+
+// we need to record the state because we cannot access it thru the manager
+@property (nonatomic) CBPeripheralManagerState peripheralManagerState;
 
 /**
  * Set this to YES, if your app will disappear, or set to NO when it will appear.

@@ -88,7 +88,7 @@
     
     if(shouldAdvertise) {
         if (!self.peripheralManager)
-            self.peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:self.queue];
+            self.peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:self.queue options:@{CBCentralManagerOptionShowPowerAlertKey : @(NO)}];
     } else {
         if (self.peripheralManager) {
             [self.peripheralManager stopAdvertising];
@@ -108,7 +108,7 @@
     
     if(shouldDiscover) {
         if (!self.centralManager)
-            self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:self.queue];
+            self.centralManager = [[CBCentralManager alloc] initWithDelegate:self queue:self.queue options:@{CBCentralManagerOptionShowPowerAlertKey : @(NO)}];
         if (!self.timer)
             [self startTimer];
     } else {
@@ -207,26 +207,34 @@
 }
 
 - (void)peripheralManagerDidUpdateState:(CBPeripheralManager *)peripheral {
-    [[NSUserDefaults standardUserDefaults] setObject:@(peripheral.state) forKey:kBluetoothPeripheralStateKey];
-
     if(peripheral.state == CBPeripheralManagerStatePoweredOn) {
         [self startAdvertising];
     }
-    else {
-        //NSLog(@"Peripheral manager state: %d", peripheral.state);
-    }
+    
+    //record the state because it's not accessible thru the peripheral manager
+    self.peripheralManagerState = peripheral.state;
+    
+    [self notifyOfChangedState];
 }
 
-- (void)centralManagerDidUpdateState:(CBCentralManager *)central
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@(central.state) forKey:kBluetoothCentralStateKey];
 
+
+- (void)centralManagerDidUpdateState:(CBCentralManager *)central {
     if (central.state == CBCentralManagerStatePoweredOn) {
         [self startDetecting];
     }
-    else {
-        //NSLog(@"Central manager state: %d", central.state);
-    }
+    
+    [self notifyOfChangedState];
+}
+
+- (void)notifyOfChangedState {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:kBluetoothStateNotificationKey
+                                                            object:nil
+                                                          userInfo:@{kBluetoothCentralStateKey : @(self.centralManager.state),
+                                                                     kBluetoothPeripheralStateKey : @(self.peripheralManagerState)}];
+    });
+    
 }
 
 - (void)updateList {
